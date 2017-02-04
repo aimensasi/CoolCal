@@ -2,6 +2,7 @@ package com.example.math.coolcalc;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -10,7 +11,20 @@ import android.widget.TextView;
 import java.util.Objects;
 
 public class CalcActivity extends Activity implements View.OnClickListener{
+    private static final String TAG = "CoolCalc";
+
     TextView mResultTextView;
+
+    int result = 0;
+    String leftValue = "";
+    String rightValue = "";
+    String currentNumber = "";
+    Operation currentOperation = null;
+    Boolean isFirst = true;
+
+    public enum Operation{
+        ADD, DIVIDE, SUBTRACT, MULTIPLY, EQUAL
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,33 +110,76 @@ public class CalcActivity extends Activity implements View.OnClickListener{
                 setResultText(resultText, "9");
                 break;
             case R.id.clear:
-                mResultTextView.setText("0");
+                resetCalc();
                 break;
             case R.id.equal:
-//                mResultTextView.setText("0");
+                processOperation(resultText, Operation.EQUAL);
                 break;
             case R.id.divide:
-//                mResultTextView.setText("0");
+                processOperation(resultText, Operation.DIVIDE);
                 break;
             case R.id.subtract:
-//                mResultTextView.setText("0");
+                processOperation(resultText, Operation.SUBTRACT);
                 break;
             case R.id.add:
-
+                processOperation(resultText, Operation.ADD);
                 break;
             case R.id.multiply:
-//                mResultTextView.setText("0");
+                processOperation(resultText, Operation.MULTIPLY);
                 break;
         }
     }
 
+    private void resetCalc() {
+        result = 0;
+        leftValue = "";
+        rightValue = "";
+        currentNumber = "";
+        currentOperation = null;
+        isFirst = true;
+        mResultTextView.setText("0");
+    }
+
     private void setResultText(String resultText, String text){
+
         if (Objects.equals(resultText, "0")){
             resultText = text;
         }else{
-            resultText += text;
+            if (isFirst && currentOperation != null){
+                resultText = text;
+                isFirst = false;
+            }else{
+                resultText += text;
+            }
         }
 
         mResultTextView.setText(resultText);
+    }
+
+    private void processOperation(String resultText, Operation operation){
+        currentNumber = resultText;
+
+        if (currentOperation != null){
+            switch (currentOperation){
+                case ADD:
+                    result = Integer.parseInt(leftValue) + Integer.parseInt(currentNumber);
+                    break;
+                case SUBTRACT:
+                    result = Integer.parseInt(leftValue) - Integer.parseInt(currentNumber);
+                    break;
+                case MULTIPLY:
+                    result = Integer.parseInt(leftValue) * Integer.parseInt(currentNumber);
+                    break;
+                case DIVIDE:
+                    result = Integer.parseInt(leftValue) / Integer.parseInt(currentNumber);
+                    break;
+            }
+            leftValue = String.valueOf(result);
+            mResultTextView.setText(leftValue);
+        }else{
+            leftValue = resultText;
+        }
+        isFirst = true;
+        currentOperation = operation;
     }
 }
